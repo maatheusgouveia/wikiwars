@@ -8,6 +8,8 @@ import {
 	View,
 } from 'react-native';
 import axios from 'axios';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Icon } from 'react-native-elements';
 
 interface Char {
 	name: string;
@@ -54,11 +56,21 @@ const Home = () => {
 					data={chars}
 					renderItem={({ item }) => (
 						<View style={styles.listItem}>
-							<Text>{item.name}</Text>
+							<TouchableOpacity onPress={() => {}}>
+								<Text>{item.name}</Text>
+							</TouchableOpacity>
+
+							<Icon
+								raised
+								name="favorite"
+								type="material"
+								color="#f50" // #999
+								onPress={() => console.log(item.name)}
+							/>
 						</View>
 					)}
 					onEndReached={handleLoadNextPage}
-					onEndReachedThreshold={0.1}
+					onEndReachedThreshold={0.2}
 				/>
 			</SafeAreaView>
 		</>
@@ -74,6 +86,13 @@ const styles = StyleSheet.create({
 		backgroundColor: '#EEE',
 		marginTop: 20,
 		padding: 30,
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	},
+
+	listItemText: {
+		flex: 1,
 	},
 });
 
