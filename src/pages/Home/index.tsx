@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toggleFavorite } from '../../store/modules/favorite/actions';
 import { getCharsRequest } from '../../store/modules/char/actions';
 import ListItem from '../../components/ListItem';
+import { useNavigation } from '@react-navigation/native';
 
 interface Char {
 	name: string;
@@ -17,8 +18,10 @@ interface StoreTypes {
 	};
 }
 
-export default function Home({ navigation }) {
+export default function Home() {
+	const navigation = useNavigation();
 	const dispatch = useDispatch();
+
 	const chars = useSelector<StoreTypes>(state => state.char.list) as Char[];
 	const count = useSelector<StoreTypes>(state => state.char.count) as number;
 	const nextPage = useSelector<StoreTypes>(
