@@ -1,9 +1,20 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { GestureResponderEvent, StyleSheet, Text, View } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-export default function ListItem({ list, onPress, onFavorite, item }) {
+interface Item {
+	name: string;
+}
+
+interface Props {
+	list: string[];
+	item: Item;
+	onPress: (event: GestureResponderEvent) => void;
+	onFavorite: (event: GestureResponderEvent) => void;
+}
+
+export default function ListItem({ list, onPress, onFavorite, item }: Props) {
 	return (
 		<View style={styles.listItem}>
 			<TouchableOpacity onPress={onPress}>
@@ -14,7 +25,11 @@ export default function ListItem({ list, onPress, onFavorite, item }) {
 				raised
 				name="favorite"
 				type="material"
-				color={list.some(fav => fav === item.name) ? '#f50' : '#999'}
+				color={
+					list.some(current => current === item.name)
+						? '#f50'
+						: '#999'
+				}
 				onPress={onFavorite}
 			/>
 		</View>
