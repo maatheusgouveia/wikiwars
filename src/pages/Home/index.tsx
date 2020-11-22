@@ -10,6 +10,9 @@ import {
 import axios from 'axios';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Icon } from 'react-native-elements';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleFavorite } from '../../store/modules/favorite/actions';
+import { getCharsRequest } from '../../store/modules/char/actions';
 
 interface Char {
 	name: string;
@@ -21,30 +24,32 @@ interface AxiosResponse {
 	count: number;
 }
 
-const Home = () => {
-	const [chars, setChars] = useState<Char[]>([]);
-	const [nextPage, setNextPage] = useState('');
-	const [count, setCount] = useState(0);
+export default function Home() {
+	const dispatch = useDispatch();
+	const chars = useSelector(state => state.char.list);
+	const count = useSelector(state => state.char.count);
+	const nextPage = useSelector(state => state.char.nextPage);
 
 	useEffect(() => {
-		axios
-			.get<AxiosResponse>('https://swapi.dev/api/people/')
-			.then((response) => {
-				setChars(response?.data?.results);
-				setNextPage(response?.data?.next);
-				setCount(response.data.count);
-			});
-	}, []);
+		dispatch(getCharsRequest('https://swapi.dev/api/people/'));
+	}, [dispatch]);
 
 	const handleLoadNextPage = useCallback(async () => {
 		if (chars.length < count) {
-			axios.get<AxiosResponse>(nextPage).then((response) => {
-				console.log(chars);
-				setChars([...chars, ...response.data.results]);
-				setNextPage(response.data.next);
-			});
+			dispatch(getCharsRequest(nextPage));
 		}
-	}, [chars, nextPage, count]);
+	}, [chars, nextPage, count, dispatch]);
+
+	const handleAddFavorite = useCallback(
+		name => {
+			dispatch(toggleFavorite(name));
+		},
+		[dispatch],
+	);
+
+	const favorites = useSelector<{ favorite: { list: string[] } }>(
+		state => state.favorite.list,
+	) as string[];
 
 	return (
 		<>
@@ -52,7 +57,7 @@ const Home = () => {
 			<SafeAreaView>
 				<FlatList
 					style={styles.list}
-					keyExtractor={(item) => item.name}
+					keyExtractor={item => item.name}
 					data={chars}
 					renderItem={({ item }) => (
 						<View style={styles.listItem}>
@@ -64,8 +69,12 @@ const Home = () => {
 								raised
 								name="favorite"
 								type="material"
-								color="#f50" // #999
-								onPress={() => console.log(item.name)}
+								color={
+									favorites.some(fav => fav === item.name)
+										? '#f50'
+										: '#999'
+								}
+								onPress={() => handleAddFavorite(item.name)}
 							/>
 						</View>
 					)}
@@ -75,7 +84,7 @@ const Home = () => {
 			</SafeAreaView>
 		</>
 	);
-};
+}
 
 const styles = StyleSheet.create({
 	list: {
@@ -95,5 +104,3 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 });
-
-export default Home;
