@@ -1,34 +1,29 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-	FlatList,
-	SafeAreaView,
-	StatusBar,
-	StyleSheet,
-	Text,
-	View,
-} from 'react-native';
-import axios from 'axios';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Icon } from 'react-native-elements';
+import React, { useCallback, useEffect } from 'react';
+import { FlatList, SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleFavorite } from '../../store/modules/favorite/actions';
 import { getCharsRequest } from '../../store/modules/char/actions';
+import ListItem from '../../components/ListItem';
 
 interface Char {
 	name: string;
 }
-
-interface AxiosResponse {
-	results: Char[];
-	next: string;
-	count: number;
+interface StoreTypes {
+	favorite: { list: string[] };
+	char: {
+		list: Char[];
+		count: number;
+		nextPage: string;
+	};
 }
 
-export default function Home() {
+export default function Home({ navigation }) {
 	const dispatch = useDispatch();
-	const chars = useSelector(state => state.char.list);
-	const count = useSelector(state => state.char.count);
-	const nextPage = useSelector(state => state.char.nextPage);
+	const chars = useSelector<StoreTypes>(state => state.char.list) as Char[];
+	const count = useSelector<StoreTypes>(state => state.char.count) as number;
+	const nextPage = useSelector<StoreTypes>(
+		state => state.char.nextPage,
+	) as string;
 
 	useEffect(() => {
 		dispatch(getCharsRequest('https://swapi.dev/api/people/'));
@@ -47,39 +42,33 @@ export default function Home() {
 		[dispatch],
 	);
 
-	const favorites = useSelector<{ favorite: { list: string[] } }>(
+	const favorites = useSelector<StoreTypes>(
 		state => state.favorite.list,
 	) as string[];
 
 	return (
 		<>
-			<StatusBar barStyle="dark-content" />
+			<StatusBar barStyle="default" />
 			<SafeAreaView>
 				<FlatList
 					style={styles.list}
 					keyExtractor={item => item.name}
 					data={chars}
-					renderItem={({ item }) => (
-						<View style={styles.listItem}>
-							<TouchableOpacity onPress={() => {}}>
-								<Text>{item.name}</Text>
-							</TouchableOpacity>
-
-							<Icon
-								raised
-								name="favorite"
-								type="material"
-								color={
-									favorites.some(fav => fav === item.name)
-										? '#f50'
-										: '#999'
-								}
-								onPress={() => handleAddFavorite(item.name)}
-							/>
-						</View>
+					renderItem={({ item, index }) => (
+						<ListItem
+							list={favorites}
+							item={item}
+							onFavorite={() => handleAddFavorite(item.name)}
+							onPress={() => {
+								navigation.navigate('Details', {
+									id: index + 1,
+									name: item.name,
+								});
+							}}
+						/>
 					)}
 					onEndReached={handleLoadNextPage}
-					onEndReachedThreshold={0.2}
+					onEndReachedThreshold={0.6}
 				/>
 			</SafeAreaView>
 		</>
@@ -89,18 +78,5 @@ export default function Home() {
 const styles = StyleSheet.create({
 	list: {
 		paddingHorizontal: 20,
-	},
-
-	listItem: {
-		backgroundColor: '#EEE',
-		marginTop: 20,
-		padding: 30,
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-	},
-
-	listItemText: {
-		flex: 1,
 	},
 });
