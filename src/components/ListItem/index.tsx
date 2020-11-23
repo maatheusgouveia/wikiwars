@@ -18,7 +18,7 @@ export default function ListItem({ list, onPress, onFavorite, item }: Props) {
 	return (
 		<View style={styles.listItem}>
 			<TouchableOpacity onPress={onPress}>
-				<Text>{item.name}</Text>
+				<Text style={styles.itemText}>{item.name}</Text>
 			</TouchableOpacity>
 
 			<Icon
@@ -44,5 +44,8 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'space-between',
+	},
+	itemText: {
+		fontSize: 18,
 	},
 });

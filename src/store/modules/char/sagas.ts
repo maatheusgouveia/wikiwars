@@ -3,7 +3,13 @@ import { takeLatest, call, put, all } from 'redux-saga/effects';
 
 import { getCharsSuccess, getCharsFailure } from './actions';
 
-export function* getChars({ payload }) {
+interface Action {
+	payload: {
+		url: string;
+	};
+}
+
+export function* getChars({ payload }: Action) {
 	const { url } = payload;
 
 	try {
